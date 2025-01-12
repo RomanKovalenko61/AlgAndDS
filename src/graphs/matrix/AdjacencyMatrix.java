@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class AdjacencyMatrix {
     public static void main(String[] args) {
-        Graph graph = new Graph(10);
+        Graph graph = new Graph(4);
 
         graph.addVertex("a", null);
         graph.addVertex("b", null);
@@ -21,16 +21,16 @@ public class AdjacencyMatrix {
 
         System.out.println(graph);
 
-        System.out.println(graph.findVertexById("c"));
+        System.out.println("Index for vertex C    " + graph.findVertexById("c"));
 
 //        graph.removeEdge("b", "c");
 //        System.out.println(graph);
 
-//        graph.removeVertex("c");
-//        System.out.println(graph);
+        graph.removeVertex("c");
+        System.out.println(graph);
 
-        System.out.println(graph.isAdjacency("b", "c"));
-        System.out.println(Arrays.toString(graph.getAdjacencyIndexes("b")));
+//        System.out.println("isAdjacency vertexes b AND c    " + graph.isAdjacency("b", "c"));
+        System.out.println("AdjacencyIndexes for vertex b   " + Arrays.toString(graph.getAdjacencyIndexes("b")));
     }
 }
 
@@ -40,7 +40,7 @@ class Graph {
     Vertex[] vertexes;
     int[][] matrix;
 
-    int size = 0;
+    int sizeMatrix = 0;
 
     public Graph() {
         vertexes = new Vertex[DEFAULT_CAPACITY];
@@ -52,8 +52,8 @@ class Graph {
         matrix = new int[capacity][capacity];
     }
 
-    public int getSize() {
-        return size;
+    public int getSizeMatrix() {
+        return sizeMatrix;
     }
 
     public int findVertexById(String id) {
@@ -76,7 +76,23 @@ class Graph {
         if (index != -1) {
             throw new IllegalArgumentException("Node with this ID already exists");
         } else {
-            vertexes[size++] = new Vertex(id, null, true);
+            checkSizeMatrix();
+            vertexes[sizeMatrix++] = new Vertex(id, null, true);
+        }
+    }
+
+    private void checkSizeMatrix() {
+        if (sizeMatrix == vertexes.length) {
+            int newSize = sizeMatrix * 2;
+            Vertex[] newVertexes = Arrays.copyOf(vertexes, newSize);
+            vertexes = newVertexes;
+            int[][] newMatrix = new int[newSize][newSize];
+            for (int i = 0; i < sizeMatrix; i++) {
+                for (int j = 0; j < sizeMatrix; j++) {
+                    newMatrix[i][j] = matrix[i][i];
+                }
+            }
+            matrix = newMatrix;
         }
     }
 
@@ -99,14 +115,12 @@ class Graph {
             throw new IllegalArgumentException("Node with this id does not exists");
         }
         vertexes[removeIndex].setPresent(false);
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < sizeMatrix; i++) {
             matrix[removeIndex][i] = 0;
         }
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < sizeMatrix; i++) {
             matrix[i][removeIndex] = 0;
         }
-//        System.arraycopy(vertexes, removeIndex + 1, vertexes, removeIndex, size - 1 - removeIndex);
-        size--;
     }
 
     public void removeEdge(String idFrom, String idTo) {
@@ -137,16 +151,16 @@ class Graph {
             throw new IllegalArgumentException("Node with this id does not exists");
         }
         int count = 0;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < sizeMatrix; i++) {
             if (matrix[vertexIndex][i] == 1) {
                 count++;
             }
         }
         String[] ids = new String[count];
         int insertIndex = 0;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < sizeMatrix; i++) {
             if (matrix[vertexIndex][i] == 1) {
-                ids[insertIndex++] = String.valueOf(i);
+                ids[insertIndex++] = vertexes[i].getId();
             }
         }
         return ids;
@@ -157,22 +171,22 @@ class Graph {
         StringBuilder builder = new StringBuilder();
         builder.append("AdjacencyMatrix");
         builder.append("\n");
-        for (int i = 0; i < vertexes.length; i++) {
-            if (vertexes[i] == null) {
-                break;
+        for (int i = 0; i < sizeMatrix; i++) {
+            if (!vertexes[i].isPresent()) {
+                continue;
             }
             builder.append("\t");
             builder.append(vertexes[i]);
         }
         builder.append("\n");
-        for (int i = 0; i < vertexes.length; i++) {
-            if (vertexes[i] == null) {
-                break;
+        for (int i = 0; i < sizeMatrix; i++) {
+            if (!vertexes[i].isPresent()) {
+                continue;
             }
             builder.append(vertexes[i]);
-            for (int j = 0; j < vertexes.length; j++) {
-                if (vertexes[j] == null) {
-                    break;
+            for (int j = 0; j < sizeMatrix; j++) {
+                if (!vertexes[j].isPresent()) {
+                    continue;
                 }
                 builder.append("\t");
                 builder.append(matrix[i][j]);
