@@ -2,7 +2,7 @@ package graphs;
 
 import java.util.*;
 
-public class DFS {
+public class Graphs {
     public static void main(String[] args) {
         Graph graph = new Graph();
 
@@ -139,6 +139,28 @@ class Graph {
         vertex.data = data;
     }
 
+    public void bfs(Vertex startVertex) {
+        Deque<Vertex> vertexesDeq = new ArrayDeque<>();
+        vertexesDeq.push(startVertex);
+        while (vertexesDeq.size() > 0) {
+            Vertex currentVertex = vertexesDeq.poll();
+            for (Vertex v : currentVertex.adjacentVertexes) {
+                if (v.color == 0) {
+                    vertexesDeq.push(v);
+                }
+            }
+            currentVertex.color = 1;
+        }
+    }
+
+    public void bfs(String startVertex) {
+        Vertex vertex = vertexes.get(startVertex);
+        if (vertex == null) {
+            return;
+        }
+        bfs(vertex);
+    }
+
     public void dfs(Vertex startVertex) {
         if (startVertex.color == 1) {
             return;
@@ -161,7 +183,8 @@ class Graph {
         boolean result = true;
         repaintVertexesToWhiteColor();
         for (String vertexId : vertexes.keySet()) {
-            dfs(vertexes.get(vertexId));
+            bfs(vertexes.get(vertexId));
+//            dfs(vertexes.get(vertexId));
             break;
         }
         for (String vertexId : vertexes.keySet()) {
