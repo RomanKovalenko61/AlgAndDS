@@ -71,6 +71,7 @@ class Graph {
         return index;
     }
 
+    //TODO: realise insert into lazy delete place
     public void addVertex(String id, Object data) {
         int index = findVertexById(id);
         if (index != -1) {
