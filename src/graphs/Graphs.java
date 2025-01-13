@@ -11,20 +11,32 @@ public class Graphs {
         graph.addVertex("c");
         graph.addVertex("d");
         graph.addVertex("e");
+        graph.addVertex("f");
+        graph.addVertex("g");
+        graph.addVertex("h");
+        graph.addVertex("i");
+        graph.addVertex("j");
 
         graph.addEdge("a", "b");
         graph.addEdge("a", "e");
         graph.addEdge("a", "d");
         graph.addEdge("a", "c");
         graph.addEdge("c", "b");
+        graph.addEdge("e", "f");
+        graph.addEdge("e", "h");
+        graph.addEdge("e", "i");
+        graph.addEdge("g", "f");
+        graph.addEdge("g", "i");
+        graph.addEdge("h", "i");
+        graph.addEdge("i", "j");
 
         System.out.println(graph);
 
         System.out.println("isConnectedGraph " + graph.isConnectedGraph());
-        graph.removeEdge("a", "d");
 
-        System.out.println(graph);
-        System.out.println("isConnectedGraph " + graph.isConnectedGraph());
+        System.out.println("Distance between c AND j " + graph.calculateDistanceBetweenVertex("c", "j"));
+
+        System.out.println("Path between c AND j " + graph.getPathBetweenVertex("c", "j"));
     }
 }
 
@@ -34,22 +46,10 @@ class Graph {
         Object data;
         List<Vertex> adjacentVertexes = new ArrayList<>();
         int color = 0; // 0 - white, 1 - black
+        int distance = -1;
 
         public Vertex(String id) {
             this.id = id;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Vertex vertex = (Vertex) o;
-            return id.equals(vertex.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id);
         }
     }
 
@@ -140,25 +140,60 @@ class Graph {
     }
 
     public void bfs(Vertex startVertex) {
-        Deque<Vertex> vertexesDeq = new ArrayDeque<>();
-        vertexesDeq.push(startVertex);
+        Queue<Vertex> vertexesDeq = new PriorityQueue<>((a, b) -> Integer.compare(b.distance, a.distance));
+        vertexesDeq.add(startVertex);
         while (vertexesDeq.size() > 0) {
             Vertex currentVertex = vertexesDeq.poll();
             for (Vertex v : currentVertex.adjacentVertexes) {
+                if (v.distance == -1) {
+                    v.distance = currentVertex.distance + 1;
+                } else {
+                    v.distance = Math.min(v.distance, currentVertex.distance + 1);
+                }
                 if (v.color == 0) {
-                    vertexesDeq.push(v);
+                    vertexesDeq.add(v);
                 }
             }
             currentVertex.color = 1;
         }
     }
 
-    public void bfs(String startVertex) {
-        Vertex vertex = vertexes.get(startVertex);
+    public void bfs(String startVertexId) {
+        Vertex vertex = vertexes.get(startVertexId);
         if (vertex == null) {
             return;
         }
+        vertex.distance = 0;
         bfs(vertex);
+    }
+
+    public int calculateDistanceBetweenVertex(String startVertexId, String endVertexId) {
+        repaintVertexesToWhiteColor();
+        bfs(startVertexId);
+        Vertex vertex = vertexes.get(endVertexId);
+        if (vertex == null) {
+            return -1;
+        }
+        int distance = vertex.distance;
+        repaintVertexesToWhiteColor();
+        return distance;
+    }
+
+    public List<String> getPathBetweenVertex(String startVertexId, String endVertexId) {
+        List<String> result = new ArrayList<>();
+        repaintVertexesToWhiteColor();
+        bfs(startVertexId);
+        Vertex vertex = vertexes.get(endVertexId);
+        if (vertex == null || vertex.distance == -1) {
+            return result;
+        }
+        while (!vertex.id.equals(startVertexId)) {
+            result.add(0, vertex.id);
+            vertex = Collections.min(vertex.adjacentVertexes, (a, b) -> Integer.compare(a.distance, b.distance));
+        }
+        result.add(0, startVertexId);
+        repaintVertexesToWhiteColor();
+        return result;
     }
 
     public void dfs(Vertex startVertex) {
@@ -200,6 +235,7 @@ class Graph {
     private void repaintVertexesToWhiteColor() {
         for (String vertexId : vertexes.keySet()) {
             vertexes.get(vertexId).color = 0;
+            vertexes.get(vertexId).distance = -1;
         }
     }
 
