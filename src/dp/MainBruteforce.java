@@ -1,5 +1,5 @@
 package dp;
-
+// https://www.youtube.com/watch?v=wcjqBf2qRe0
 public class MainBruteforce {
     public static void main(String[] args) {
         int[] weights = {3, 4, 5, 8, 9};
